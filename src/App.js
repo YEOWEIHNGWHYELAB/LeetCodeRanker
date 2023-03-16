@@ -65,7 +65,7 @@ export default class App extends Component{
 
   async getUsernames() {
     const friendUsernameFile = "./friends.txt";
-    const inspirationUsernameFile = "./inspiration.txt";
+    const inspirationUsernameFile = "./inspirations.txt";
 
     await fetch(friendUsernameFile)
       .then(response => response.text())
@@ -75,6 +75,8 @@ export default class App extends Component{
       .catch(error => {
         console.error(error);
       });
+
+    this.state.friendUsernames.push(this.state.myUsername);
 
     await fetch(inspirationUsernameFile)
       .then(response => response.text())
@@ -111,16 +113,16 @@ export default class App extends Component{
     let count = 0;
     let dataQnCount = [];
 
-    if (this.state.friendUsernames.length != 0) {
-      this.state.friendUsernames.push(this.state.myUsername);
-      
-      for (const username of this.state.friendUsernames) {
+    const allUsername = [...this.state.friendUsernames, ...this.state.inspirationUsernames];
+
+    if (allUsername.length !== 0) {
+      for (const username of allUsername) {
         const variables = { username };
         const response = await this.getQuestionCompletedCount(query, variables);
         
-        // console.log(response);
+        // console.log(username);
 
-        if (username != this.state.myUsername) {
+        if (username !== this.state.myUsername) {
           dataQnCount.push({id: count, title: username, value: response.value, color: this.getRandomColor()});
         } else {
           dataQnCount.push({id: count, title: "YOU", value: response.value, color: "#FF0000"});
