@@ -23,6 +23,17 @@ export default class App extends Component{
       this.handleChange();
     }, 2000);
   }
+
+  getRandomColor() {
+    // generate a random integer between 0 and 16777215
+    const randomInt = Math.floor(Math.random() * 16777216);
+  
+    // convert the integer to a hexadecimal string and pad with leading zeros
+    const hexString = randomInt.toString(16).padStart(6, "0");
+  
+    // return the hexadecimal string with a leading #
+    return "#" + hexString;
+  }
  
   getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -99,6 +110,10 @@ export default class App extends Component{
     
     let count = 0;
     let dataQnCount = [];
+    const response = await this.getQuestionCompletedCount(query, { username: this.state.myUsername });
+    dataQnCount.push({id: count, title: "YOU", value: response.value, color: "#FF0000" });
+    
+    count += 1;
 
     if (this.state.friendUsernames.length != 0) {
       for (const username of this.state.friendUsernames) {
@@ -107,13 +122,13 @@ export default class App extends Component{
         
         // console.log(response);
 
-        dataQnCount.push({id: count, title: username, value: response.value, color: '#FF0000' });
+        dataQnCount.push({id: count, title: username, value: response.value, color: this.getRandomColor()});
 
         count += 1;
       }
     }
 
-    console.log(dataQnCount);
+    // console.log(dataQnCount);
 
     return dataQnCount;
   }
