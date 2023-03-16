@@ -112,7 +112,7 @@ export default class App extends Component{
     let dataQnCount = [];
     const response = await this.getQuestionCompletedCount(query, { username: this.state.myUsername });
     dataQnCount.push({id: count, title: "YOU", value: response.value, color: "#FF0000" });
-    
+
     count += 1;
 
     if (this.state.friendUsernames.length != 0) {
@@ -137,7 +137,7 @@ export default class App extends Component{
     return(
       <div>
         <h1>
-          LeetCode Solved Rankings
+          LeetCode Solved Count Rankings
         </h1>
 
         <ChartRace
