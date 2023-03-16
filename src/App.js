@@ -12,7 +12,8 @@ export default class App extends Component{
     this.state = {
       data: [],
       dataQnCount: [],
-      allSolvedQuesetionsCount: -1
+      friendUsernames: [],
+      inspirationUsernames: [],
     };
 
     this.handleChange();
@@ -41,7 +42,45 @@ export default class App extends Component{
     this.setState({ data });
   }
 
-  async componentDidMount(username="YEOWEIHNGWHYELAB") {
+  async getQuestionCompletedCount(query, variables) {
+    try {
+      const dataQnCount = await request('/graphql', query, variables);
+      const solvedQuestions = dataQnCount.matchedUser.submitStats.acSubmissionNum;
+      const allSolvedQuesetionsCount = solvedQuestions[0].count;
+      console.log(variables);
+      console.log(allSolvedQuesetionsCount);
+      this.setState({ allSolvedQuesetionsCount });  
+    } catch (error) {
+      console.error(`Error fetching LeetCode data: ${error}`);
+    }
+  }
+
+  async getUsernames() {
+    const friendUsernameFile = "./friends.txt";
+    const inspirationUsernameFile = "./inspiration.txt";
+
+    await fetch(friendUsernameFile)
+      .then(response => response.text())
+      .then(text => {
+        this.state.friendUsernames = text.trim().split('\n');
+      })
+      .catch(error => {
+        console.error(error);
+      });
+
+    await fetch(inspirationUsernameFile)
+      .then(response => response.text())
+      .then(text => {
+        this.state.friendUsernames = text.trim().split('\n');
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }
+
+  async componentDidMount() {
+    await this.getUsernames();
+
     const query = `
       query GetUserStats($username: String!) 
       {
@@ -61,44 +100,15 @@ export default class App extends Component{
       }
     `;
 
-    const variables = { username };
-
-    try {
-      const friendUsernameFile = "./friends.txt";
-      const inspirationUsernameFile = "./inspiration.txt";
-
-      fetch(friendUsernameFile)
-        .then(response => response.text())
-        .then(text => {
-          const friendUsernames = text.trim().split('\n');
-          console.log(friendUsernames);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-      
-      fetch(inspirationUsernameFile)
-        .then(response => response.text())
-        .then(text => {
-          const inspirationUsernames = text.trim().split('\n');
-          console.log(inspirationUsernames);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-
-      const dataQnCount = await request('/graphql', query, variables);
-      const solvedQuestions = dataQnCount.matchedUser.submitStats.acSubmissionNum;
-      const allSolvedQuesetionsCount = solvedQuestions[0].count;
-      this.setState({ allSolvedQuesetionsCount });
-    } catch (error) {
-      console.error(`Error fetching LeetCode data: ${error}`);
+    if (this.state.friendUsernames.length != 0) {
+      for (const username of this.state.friendUsernames) {
+        const variables = { username };
+        await this.getQuestionCompletedCount(query, variables);
+      }
     }
   }
- 
-  render(){
-    const allSolvedQuesetionsCount = this.state.allSolvedQuesetionsCount;
 
+  render() {
     return(
       <div>
         <h1>
@@ -115,14 +125,6 @@ export default class App extends Component{
           titleStyle={{ font: 'normal 400 13px Arial', color: '#fff' }}
           valueStyle={{ font: 'normal 400 11px Arial', color: 'rgba(255,255,255, 0.42)' }}
         />
-
-        <h2>
-          {allSolvedQuesetionsCount === -1 ? (
-            <p>Loading...</p>
-          ) : (
-            <p>{`Number of solved questions: ${allSolvedQuesetionsCount}`}</p>
-          )}
-        </h2>
       </div>
     );
   }
