@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.3.4",
     "cheerio": "^1.0.0-rc.12",
+    "fs": "^0.0.1-security",
     "graphql": "^16.6.0",
     "graphql-request": "^5.2.0",
     "http-proxy-middleware": "^2.0.6",

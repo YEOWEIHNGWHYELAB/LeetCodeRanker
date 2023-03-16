@@ -31,7 +31,7 @@ export default class App extends Component{
   handleChange() {
     const data = [
       { id: 0, title: 'Ayfonkarahisar', value: this.getRandomInt(10, 90), color: '#50c4fe' },
-      { id: 1, title: 'Kayseri', value: 38, color: '#3fc42d' },
+      { id: 1, title: 'Kayseri', value: this.state.allSolvedQuesetionsCount, color: '#3fc42d' },
       { id: 2, title: 'Muğla', value: this.getRandomInt(10, 90), color: '#c33178' },
       { id: 3, title: 'Uşak', value: this.getRandomInt(10, 1000), color: '#423bce' },
       { id: 4, title: 'Sivas', value: 58, color: '#c8303b' },
@@ -41,10 +41,11 @@ export default class App extends Component{
     this.setState({ data });
   }
 
-  async componentDidMount() {
+  async componentDidMount(username="YEOWEIHNGWHYELAB") {
     const query = `
+      query GetUserStats($username: String!) 
       {
-        matchedUser(username: "YEOWEIHNGWHYELAB") 
+        matchedUser(username: $username) 
         {
             username
             submitStats: submitStatsGlobal 
@@ -60,8 +61,33 @@ export default class App extends Component{
       }
     `;
 
+    const variables = { username };
+
     try {
-      const dataQnCount = await request('/graphql', query);
+      const friendUsernameFile = "./friends.txt";
+      const inspirationUsernameFile = "./inspiration.txt";
+
+      fetch(friendUsernameFile)
+        .then(response => response.text())
+        .then(text => {
+          const friendUsernames = text.trim().split('\n');
+          console.log(friendUsernames);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+      
+      fetch(inspirationUsernameFile)
+        .then(response => response.text())
+        .then(text => {
+          const inspirationUsernames = text.trim().split('\n');
+          console.log(inspirationUsernames);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+
+      const dataQnCount = await request('/graphql', query, variables);
       const solvedQuestions = dataQnCount.matchedUser.submitStats.acSubmissionNum;
       const allSolvedQuesetionsCount = solvedQuestions[0].count;
       this.setState({ allSolvedQuesetionsCount });
