@@ -14,6 +14,7 @@ export default class App extends Component{
       dataQnCount: [],
       friendUsernames: [],
       inspirationUsernames: [],
+      myUsername: "YEOWEIHNGWHYELAB"
     };
 
     this.handleChange();
@@ -29,17 +30,11 @@ export default class App extends Component{
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
  
-  handleChange() {
-    const data = [
-      { id: 0, title: 'Ayfonkarahisar', value: this.getRandomInt(10, 90), color: '#50c4fe' },
-      { id: 1, title: 'Kayseri', value: this.state.allSolvedQuesetionsCount, color: '#3fc42d' },
-      { id: 2, title: 'Muğla', value: this.getRandomInt(10, 90), color: '#c33178' },
-      { id: 3, title: 'Uşak', value: this.getRandomInt(10, 1000), color: '#423bce' },
-      { id: 4, title: 'Sivas', value: 58, color: '#c8303b' },
-      { id: 5, title: 'Konya', value: 16, color: '#2c2c2c' }
-    ];
+  async handleChange() {
+    let dataQnCount = [];
+    dataQnCount = await this.componentDidMount();
 
-    this.setState({ data });
+    this.setState({ dataQnCount });
   }
 
   async getQuestionCompletedCount(query, variables) {
@@ -47,9 +42,11 @@ export default class App extends Component{
       const dataQnCount = await request('/graphql', query, variables);
       const solvedQuestions = dataQnCount.matchedUser.submitStats.acSubmissionNum;
       const allSolvedQuesetionsCount = solvedQuestions[0].count;
-      console.log(variables);
-      console.log(allSolvedQuesetionsCount);
-      this.setState({ allSolvedQuesetionsCount });  
+      
+      // console.log(variables.username);
+      // console.log(allSolvedQuesetionsCount);
+      
+      return {title: variables.username, value: allSolvedQuesetionsCount};
     } catch (error) {
       console.error(`Error fetching LeetCode data: ${error}`);
     }
@@ -71,7 +68,7 @@ export default class App extends Component{
     await fetch(inspirationUsernameFile)
       .then(response => response.text())
       .then(text => {
-        this.state.friendUsernames = text.trim().split('\n');
+        this.state.inspirationUsernames = text.trim().split('\n');
       })
       .catch(error => {
         console.error(error);
@@ -99,13 +96,26 @@ export default class App extends Component{
         }
       }
     `;
+    
+    let count = 0;
+    let dataQnCount = [];
 
     if (this.state.friendUsernames.length != 0) {
       for (const username of this.state.friendUsernames) {
         const variables = { username };
-        await this.getQuestionCompletedCount(query, variables);
+        const response = await this.getQuestionCompletedCount(query, variables);
+        
+        // console.log(response);
+
+        dataQnCount.push({id: count, title: username, value: response.value, color: '#FF0000' });
+
+        count += 1;
       }
     }
+
+    console.log(dataQnCount);
+
+    return dataQnCount;
   }
 
   render() {
@@ -116,7 +126,7 @@ export default class App extends Component{
         </h1>
 
         <ChartRace
-          data={this.state.data}
+          data={this.state.dataQnCount}
           backgroundColor='#000'
           padding={12}
           itemHeight={30} // or any smaller value
