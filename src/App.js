@@ -110,19 +110,21 @@ export default class App extends Component{
     
     let count = 0;
     let dataQnCount = [];
-    const response = await this.getQuestionCompletedCount(query, { username: this.state.myUsername });
-    dataQnCount.push({id: count, title: "YOU", value: response.value, color: "#FF0000" });
-
-    count += 1;
 
     if (this.state.friendUsernames.length != 0) {
+      this.state.friendUsernames.push(this.state.myUsername);
+      
       for (const username of this.state.friendUsernames) {
         const variables = { username };
         const response = await this.getQuestionCompletedCount(query, variables);
         
         // console.log(response);
 
-        dataQnCount.push({id: count, title: username, value: response.value, color: this.getRandomColor()});
+        if (username != this.state.myUsername) {
+          dataQnCount.push({id: count, title: username, value: response.value, color: this.getRandomColor()});
+        } else {
+          dataQnCount.push({id: count, title: "YOU", value: response.value, color: "#FF0000"});
+        }
 
         count += 1;
       }
@@ -139,6 +141,10 @@ export default class App extends Component{
         <h1>
           LeetCode Solved Count Rankings
         </h1>
+
+        <h2>
+          Hello {this.state.myUsername}
+        </h2>
 
         <ChartRace
           data={this.state.dataQnCount}
