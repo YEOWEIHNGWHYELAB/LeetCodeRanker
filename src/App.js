@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-import cheerio from 'cheerio';
 import { request } from 'graphql-request';
 import ChartRace from 'react-chart-race';
 import './styles/App.css';
@@ -43,7 +41,7 @@ export default class App extends Component{
  
   async handleChange() {
     let dataQnCount = [];
-    dataQnCount = await this.componentDidMount();
+    dataQnCount = await this.getGraphQLData();
 
     this.setState({ dataQnCount });
   }
@@ -56,6 +54,7 @@ export default class App extends Component{
       
       // console.log(variables.username);
       // console.log(allSolvedQuesetionsCount);
+      // console.log(solvedQuestions[2].count);
       
       return {title: variables.username, value: allSolvedQuesetionsCount};
     } catch (error) {
@@ -88,7 +87,7 @@ export default class App extends Component{
       });
   }
 
-  async componentDidMount() {
+  async getGraphQLData() {
     await this.getUsernames();
 
     const query = `
