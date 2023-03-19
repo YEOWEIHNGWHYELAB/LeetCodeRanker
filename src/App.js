@@ -8,11 +8,11 @@ export default class App extends Component{
     super(props);
 
     this.state = {
-      data: [],
       dataQnCount: [],
       friendUsernames: [],
       inspirationUsernames: [],
-      myUsername: "YEOWEIHNGWHYELAB"
+      myUsername: "YEOWEIHNGWHYELAB",
+      newUsername: '', // added for input field
     };
 
     this.handleChange();
@@ -38,6 +38,28 @@ export default class App extends Component{
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
+
+  handleAddUsername = () => {
+    const currFriendUsernames = this.state.friendUsernames;
+    const currNewUsername = this.state.newUsername;
+
+    if (currNewUsername) {
+      this.setState({
+        friendUsernames: [...currFriendUsernames, currNewUsername],
+        newUsername: '',
+      });
+    }
+  };
+
+  handleNewUsernameChange = (event) => {
+    this.setState({ newUsername: event.target.value });
+  };
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.friendUsernames !== this.state.friendUsernames) {
+      localStorage.setItem('friendUsernames', JSON.stringify(this.state.friendUsernames));
+    }
+  }
  
   async handleChange() {
     let dataQnCount = [];
@@ -51,10 +73,6 @@ export default class App extends Component{
       const dataQnCount = await request('/graphql', query, variables);
       const solvedQuestions = dataQnCount.matchedUser.submitStats.acSubmissionNum;
       const allSolvedQuesetionsCount = solvedQuestions[0].count;
-      
-      // console.log(variables.username);
-      // console.log(allSolvedQuesetionsCount);
-      // console.log(solvedQuestions[2].count);
       
       return {title: variables.username, value: allSolvedQuesetionsCount};
     } catch (error) {
@@ -88,8 +106,6 @@ export default class App extends Component{
   }
 
   async getGraphQLData() {
-    await this.getUsernames();
-
     const query = `
       query GetUserStats($username: String!) 
       {
@@ -118,8 +134,6 @@ export default class App extends Component{
       for (const username of allUsername) {
         const variables = { username };
         const response = await this.getQuestionCompletedCount(query, variables);
-        
-        // console.log(username);
 
         if (username !== this.state.myUsername) {
           dataQnCount.push({id: count, title: username, value: response.value, color: this.getRandomColor()});
@@ -131,9 +145,13 @@ export default class App extends Component{
       }
     }
 
-    // console.log(dataQnCount);
-
     return dataQnCount;
+  }
+
+  async componentDidMount() {
+    // await this.getUsernames();
+    const friendUsernames = JSON.parse(localStorage.getItem('friendUsernames')) || [];
+    this.setState({ friendUsernames });
   }
 
   render() {
@@ -146,6 +164,16 @@ export default class App extends Component{
         <h2>
           Hello {this.state.myUsername}
         </h2>
+
+        <div>
+          <input
+            type="text"
+            placeholder="Enter a username"
+            value={this.newUsername}
+            onChange={this.handleNewUsernameChange}
+          />
+          <button onClick={this.handleAddUsername}>Add</button>
+        </div>
 
         <ChartRace
           data={this.state.dataQnCount}
