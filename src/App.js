@@ -39,25 +39,50 @@ export default class App extends Component{
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
-  handleAddUsername = () => {
-    const currFriendUsernames = this.state.friendUsernames;
-    const currNewUsername = this.state.newUsername;
+  handleAddUsername = async () => {
+    const query = `
+      query GetUserStats($username: String!) 
+      {
+        matchedUser(username: $username) 
+        {
+            username
+            submitStats: submitStatsGlobal 
+            {
+                acSubmissionNum 
+                {
+                    difficulty
+                    count
+                    submissions
+                }
+            }
+        }
+      }
+    `;
 
-    if (currNewUsername) {
-      this.setState({
-        friendUsernames: [...currFriendUsernames, currNewUsername],
-        newUsername: '',
-      });
+    let variables = {username: this.state.newUsername}
+    const response = await this.getQuestionCompletedCount(query, variables);
+    
+    if (response) {
+      const currFriendUsernames = this.state.friendUsernames;
+      const currNewUsername = this.state.newUsername;
+
+      if (currNewUsername && !currFriendUsernames.includes(currNewUsername)) {
+        this.setState({
+          friendUsernames: [...currFriendUsernames, currNewUsername],
+        });
+      }
     }
   };
 
   handleRemoveUsername = () => {
-    const currFriendUsernames = this.state.friendUsernames;
-    const newUsers = currFriendUsernames.filter((user) => user !== this.state.newUsername);
-    
-    this.setState(
-      { friendUsernames: [...newUsers], newUsername: '' }
-    );
+    if (this.state.friendUsernames.length !== 0) {
+      const currFriendUsernames = this.state.friendUsernames;
+      const newUsers = currFriendUsernames.filter((user) => user != this.state.newUsername);
+      
+      this.setState(
+        { friendUsernames: [...newUsers] }
+      );
+    }
   };
 
   handleNewUsernameChange = (event) => {
