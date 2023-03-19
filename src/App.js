@@ -51,6 +51,15 @@ export default class App extends Component{
     }
   };
 
+  handleRemoveUsername = () => {
+    const currFriendUsernames = this.state.friendUsernames;
+    const newUsers = currFriendUsernames.filter((user) => user !== this.state.newUsername);
+    
+    this.setState(
+      { friendUsernames: [...newUsers], newUsername: '' }
+    );
+  };
+
   handleNewUsernameChange = (event) => {
     this.setState({ newUsername: event.target.value });
   };
@@ -173,6 +182,7 @@ export default class App extends Component{
             onChange={this.handleNewUsernameChange}
           />
           <button onClick={this.handleAddUsername}>Add</button>
+          <button onClick={this.handleRemoveUsername}>Remove</button>
         </div>
 
         <ChartRace
