@@ -1,4 +1,16 @@
-# Getting Started with Create React App
+# LEETCODERANKER
+
+## Description
+
+This application gets the rank of all your friends you added and display it in Chart Race.
+
+However, do note that the more friends you add, the slower the response time for the change 
+to show up for the adding and removing of your friends. It can take more to 20 seconds before 
+changes are reflected due to the latency of the graphQL API. So the chart might be updated every 
+2 seconds, but however the graphQL data for all your friends probably takes more than 10 times of 
+that if you have that many friends wink wink.
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
